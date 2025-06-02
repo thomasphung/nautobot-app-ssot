@@ -240,6 +240,7 @@ class VirtualMachineModel(vSphereModelDiffSync):
         "disk",
         "primary_ip4__host",
         "primary_ip6__host",
+        "platform__name",
     )
     _children = {"interface": "interfaces"}
 
@@ -251,6 +252,7 @@ class VirtualMachineModel(vSphereModelDiffSync):
     cluster__name: str
     primary_ip4__host: Optional[str] = None
     primary_ip6__host: Optional[str] = None
+    platform__name: Optional[str] = None
 
     interfaces: List[VMInterface] = []
 

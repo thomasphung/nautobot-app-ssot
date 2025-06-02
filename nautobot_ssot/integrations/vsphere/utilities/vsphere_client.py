@@ -153,6 +153,10 @@ class VsphereClient:  # pylint: disable=too-many-instance-attributes
         """Get all VMs details."""
         return self._request("GET", f"{self.vsphere_uri}/rest/vcenter/vm/{vm_id}")
 
+    def get_vm_guest_os_identity(self, vm_id: str) -> Dict:
+        """Get guest operating system identification information"""
+        return self._request("GET", f"{self.vsphere_uri}/rest/vcenter/vm/{vm_id}/guest/identity")
+
     def get_host_from_cluster(self, cluster: str) -> Dict:
         """Get hosts from cluster."""
         return self._request("GET", f"{self.vsphere_uri}/rest/vcenter/host/?filter.clusters={cluster}")

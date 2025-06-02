@@ -114,6 +114,7 @@ class VsphereDataSource(DataSource):  # pylint: disable=too-many-instance-attrib
                 reverse("virtualization:vminterface_list"),
             ),
             DataMapping("IP Addresses", None, "IP Addresses", reverse("ipam:ipaddress_list")),
+            DataMapping("Guest OS", None, "Platform", reverse("dcim:platform_list")),
         )
 
     def log_debug(self, message):
@@ -126,6 +127,7 @@ class VsphereDataSource(DataSource):  # pylint: disable=too-many-instance-attrib
         self.logger.info("Connecting to vSphere.")
         client_config = _get_vsphere_client_config(self.config, self.debug)
         client = VsphereClient(client_config)  # pylint: disable=unexpected-keyword-arg
+        # self.logger.info("client.is_authenticated", client.is_authenticated)
         if not client.is_authenticated:
             self.logger.debug("Failed to authenticate with vSphere. Check your credentials and configuration.")
             raise ValueError("vSphere authentication failed.")
