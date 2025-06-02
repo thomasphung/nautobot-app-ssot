@@ -48,13 +48,15 @@ def get_disk_total(disks: List):
         total += disk["value"]["capacity"]
     return int(total / 1024.0**3)
 
-def get_guest_os_name(response: dict):
+def get_guest_os_name(client, vm_id: str):
+    is_vmware_tool_installed = client.get_vmware_tools_status(vm_id).json()["value"]["run_state"] == "RUNNING"
     # Note: if VMware Tools is not running on a particular VM, cannot get OS details
-    if (response.get("error_type") is not None):
+    if (not is_vmware_tool_installed):
         return None
     else:
+        virtual_machine_os_details = client.get_vm_guest_os_identity(vm_id).json()["value"]
         # Note: "default_message" gives default localized OS name
-        return response["full_name"]["default_message"]
+        return virtual_machine_os_details["full_name"]["default_message"]
     
 class VsphereDiffSync(Adapter):
     """vSphere adapter for DiffSync."""
@@ -92,7 +94,6 @@ class VsphereDiffSync(Adapter):
 
         for virtual_machine in virtual_machines:
             virtual_machine_details = self.client.get_vm_details(virtual_machine["vm"]).json()["value"]
-            virtual_machine_os_details = self.client.get_vm_guest_os_identity(virtual_machine["vm"]).json()["value"]
                                                                              
             diffsync_virtualmachine, _ = self.get_or_instantiate(
                 self.virtual_machine,
@@ -106,7 +107,7 @@ class VsphereDiffSync(Adapter):
                         else None
                     ),
                     "status__name": self.config.default_vm_status_map[virtual_machine_details["power_state"]],
-                    "platform__name": get_guest_os_name(virtual_machine_os_details),
+                    "platform__name": get_guest_os_name(self.client, virtual_machine["vm"]),
                 },
             )
             # diffsync_cluster.add_child(diffsync_virtualmachine)
@@ -288,7 +289,6 @@ class VsphereDiffSync(Adapter):
         virtual_machines = self.client.get_vms().json()["value"]
         for virtual_machine in virtual_machines:
             virtual_machine_details = self.client.get_vm_details(virtual_machine["vm"]).json()["value"]
-            virtual_machine_os_details = self.client.get_vm_guest_os_identity(virtual_machine["vm"]).json()["value"]
 
             self.job.log_debug(message=f"Virtual Machine Details: {virtual_machine_details}")
             diffsync_virtualmachine, _ = self.get_or_instantiate(
@@ -306,7 +306,7 @@ class VsphereDiffSync(Adapter):
                         else None
                     ),
                     "status__name": self.config.default_vm_status_map[virtual_machine_details["power_state"]],
-                    "platform__name": get_guest_os_name(virtual_machine_os_details),
+                    "platform__name": get_guest_os_name(self.client, virtual_machine["vm"]),
                 },
             )
             # default_diffsync_cluster.add_child(diffsync_virtualmachine)

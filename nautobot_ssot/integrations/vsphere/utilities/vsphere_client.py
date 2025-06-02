@@ -171,3 +171,8 @@ class VsphereClient:  # pylint: disable=too-many-instance-attributes
             "GET",
             f"{self.vsphere_uri}/rest/vcenter/vm/{vm_id}/guest/networking/interfaces",
         )
+
+    def get_vmware_tools_status(self, vm_id: str) -> Dict:
+        """Check if VMware Tools is running on a VM."""
+        return self._request("GET", f"{self.vsphere_uri}/rest/vcenter/vm/{vm_id}/tools")
+    
